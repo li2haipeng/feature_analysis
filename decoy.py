@@ -24,7 +24,7 @@ def uni_trace(trace):
     return trace_info
 
 
-def decoy(candidate, sel_trace):
+def decoy(candidate, sel_trace, start_idx, end_idx):
     candidiate_info = uni_trace(candidate)
     sel_trace_info = uni_trace(sel_trace)
     decoyed=[]
@@ -44,22 +44,38 @@ def decoy(candidate, sel_trace):
     else:
         decoyed.extend(sel_trace_info[d_len:])
 
-    trace1 = [candidate[0]]
-    trace2 = [sel_trace[0]]
-    for p in decoyed:
+    trace1 = candidate[0:start_idx+1]
+    trace2 = sel_trace[0:start_idx+1]
+
+    bursts_sum = busrts_start_idx = busrt_end_idx = 0
+    for i, d in enumerate(decoyed):
+        bursts_sum += abs(d)
+        if bursts_sum >= start_idx:
+            busrts_start_idx = i
+            bursts_sum = 0
+            for ii, dd in enumerate(decoyed[i:]):
+                bursts_sum += abs(dd)
+                busrt_end_idx = ii + busrts_start_idx
+                if bursts_sum >= (end_idx - start_idx):
+                    break
+            break
+    for p in decoyed[busrts_start_idx:busrt_end_idx]:
         if p > 0:
             trace1.extend(abs(p) * [1])
             trace2.extend(abs(p) * [1])
         else:
             trace1.extend(abs(p) * [-1])
             trace2.extend(abs(p) * [-1])
-
+    trace1.extend(candidate[end_idx:])
+    trace2.extend(sel_trace[end_idx:])
+    trace1 = np.array(trace1)
+    trace2 = np.array(trace2)
     pad = lambda a,i: a[0:i] if a.shape[0]>i else np.hstack((a, np.zeros(i-a.shape[0])))
-    trace1 = pad(np.array(trace1), 5000)
-    trace2 = pad(np.array(trace2), 5000)
+    trace1 = pad(trace1, 5001)
+    trace2 = pad(trace2, 5001)
 
     ori_size = sum([abs(ele) for ele in candidiate_info]) + sum([abs(ele) for ele in sel_trace_info])
-    overhead = 2* sum([abs(ele) for ele in decoyed]) - sum([abs(ele) for ele in candidiate_info]) - sum([abs(ele) for ele in sel_trace_info])
+    overhead = sum([abs(ele) for ele in trace1[1:]]) + sum([abs(ele) for ele in trace2[1:]]) - ori_size
     with open('wf_decoy.csv', 'a') as f:
         writer = csv.writer(f)
         writer.writerow(trace1)
@@ -95,16 +111,17 @@ def pair(lists):
                 #     writer = csv.writer(f)
                 #     writer.writerow([label1, label2, distance])
         sel_trace = lists.pop(sel_id)
-        ori_size, _overhead = decoy(candidate, sel_trace)
+        ori_size, _overhead = decoy(candidate, sel_trace, 1500, 4000)
         Size += ori_size
         Overhead += _overhead
-    # r = Overhead/Size
-    # file = open('overhead.txt', 'w')
-    # file.write(r)
+    r = Overhead/Size
+    with open('decoy_overhead.csv', 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow(r)
 
 
 def seperate():
-    # path = '/home/lhp/PycharmProjects/feature_analysis/datafiles/WF_dataset/wf.csv'
+    path = '/home/lhp/PycharmProjects/feature_analysis/chunks/1.csv'
     # chunks = []
     # chunksize = 4000
     # # for i in range(95):
@@ -113,7 +130,7 @@ def seperate():
     # for chunk in pd.read_csv(path, chunksize=chunksize):
     #     lists=chunk.values.tolist()
     #     lists.sort(key=su.sort_by_name)
-    path = sys.argv[1]
+    # path = sys.argv[1]
     df = pd.read_csv(path, header=None)
     lists = df.values.tolist()
     pair(lists)
