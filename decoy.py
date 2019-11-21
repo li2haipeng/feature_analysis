@@ -53,8 +53,11 @@ def decoy(candidate, sel_trace):
         else:
             trace1.extend(abs(p) * [-1])
             trace2.extend(abs(p) * [-1])
-    trace1 += [0] * (5001-len(trace1))
-    trace2 += [0] * (5001-len(trace2))
+
+    pad = lambda a,i: a[0:i] if a.shape[0]>i else np.hstack((a, np.zeros(i-a.shape[0])))
+    trace1 = pad(np.array(trace1), 5000)
+    trace2 = pad(np.array(trace2), 5000)
+
     ori_size = sum([abs(ele) for ele in candidiate_info]) + sum([abs(ele) for ele in sel_trace_info])
     overhead = 2* sum([abs(ele) for ele in decoyed]) - sum([abs(ele) for ele in candidiate_info]) - sum([abs(ele) for ele in sel_trace_info])
     with open('wf_decoy.csv', 'a') as f:
