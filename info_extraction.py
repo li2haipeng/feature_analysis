@@ -63,6 +63,7 @@ def average(pa):
         writer = csv.writer(w)
         writer.writerow(ave_list)
 
+
 def pattern_analyzation():
     path = '/home/lhp/PycharmProjects/dataset/WF_dataset/wf_incoming.csv'
     data = pd.read_csv(path)

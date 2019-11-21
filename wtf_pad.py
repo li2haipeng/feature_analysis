@@ -17,23 +17,20 @@ def calculate_ratio(packets):
         p.append(r)
 
 
-def sample_from_distribution(in_interval_list, out_interval_list):
-    in_interval = out_interval = 0
+def sample_from_distribution(interval_list):
+    interval = 0
     # calculate_ratio(size_list)
     # interval_list.sort(key=su.sort_by_third, reverse=True)
     # calculate_ratio(interval_list)
 
     a = random.randint(0, 99)/100
-    b = random.randint(0, 99)/100
-    for p in in_inter_list:
+
+    for p in interval_list:
         if a <= p[2]:
-            in_interval = p[0]
+            interval = p[0]
             break
-    for p in out_interval_list:
-        if b <= p[2]:
-            out_interval = p[0]
-            break
-    return in_interval, out_interval
+
+    return interval
 
 
 def distribution():
@@ -82,17 +79,99 @@ def distribution():
 def padding(trace, in_inter_list, out_inter_list):
     padded=[]
     label=trace.pop(0)
-    padded.extend(label)
+    padded.append(label)
 
-    in_interval, out_interval = sample_from_distribution(in_inter_list, out_inter_list)
+    in_interval = sample_from_distribution(in_inter_list)
+    out_interval = sample_from_distribution(out_inter_list)
+    # if in_interval > 1:
+    #     in_interval = 1
+    # if out_interval > 1:
+    #     out_interval = 1
+    # in_interval = out_interval = 1
     in_count = 0
     out_count = 0
+    out_sum = in_sum = 0
+    in_overhead = out_overhead = 0
     for p in trace:
+        padded.append(p)
         if p == 1:
-            if out_count >= in_interval:
+            out_sum += 1
             out_count += 1
+            in_count = 0
+            if out_count >= in_interval:
+                in_interval = sample_from_distribution(in_inter_list)
+                n = round(in_interval/2)
+                padded.extend(n*[-1.0])
+                in_overhead += n
+                out_count = 0
+
+                # if in_interval > 1:
+                #     in_interval = 1
+        else:
+            in_sum += 1
+            in_count += 1
+            out_count = 0
+            if in_count >= out_interval :
+                out_interval = sample_from_distribution(out_inter_list)
+                n = round(out_interval/2)
+                padded.extend(n*[1.0])
+                out_overhead += n
+                in_count = 0
+
+                # if out_interval > 1:
+                #     out_interval = 1
+    with open('wf_overhead_round.csv', 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow([in_sum, out_sum, in_overhead, out_overhead])
+    return padded
 
 
+def adv_padding(trace, in_inter_list, out_inter_list):
+    padded = []
+    label = trace.pop(0)
+    padded.append(label)
+
+    in_interval = sample_from_distribution(in_inter_list)
+    out_interval = sample_from_distribution(out_inter_list)
+    # if in_interval > 1:
+    #     in_interval = 1
+    # if out_interval > 1:
+    #     out_interval = 1
+    # in_interval = out_interval = 1
+    in_count = 0
+    out_count = 0
+    out_sum = in_sum = 0
+    in_overhead = out_overhead = 0
+    for p in trace:
+        padded.append(p)
+        if p == 1:
+            out_sum += 1
+            out_count += 1
+            in_count = 0
+            if out_count >= in_interval:
+                in_interval = sample_from_distribution(in_inter_list)
+                n = in_interval
+                padded.extend(n * [-1.0])
+                in_overhead += n
+                out_count = 0
+
+        else:
+            in_sum += 1
+            in_count += 1
+            out_count = 0
+            if in_count >= out_interval:
+                out_interval = sample_from_distribution(out_inter_list)
+                if out_interval > 4:
+                    out_interval = 4
+                n = out_interval
+                padded.extend(n * [1.0])
+                out_overhead += n
+                in_count = 0
+
+
+    with open('wf_overhead_4.csv', 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow([in_sum, out_sum, in_overhead, out_overhead])
     return padded
 
 
@@ -106,22 +185,29 @@ if __name__ == '__main__':
     calculate_ratio(out_inter_list)
 
 
-    # path = '/home/lhp/PycharmProjects/feature_analysis/datafiles/WF_dataset/wf.csv'
+    path = '/home/lhp/PycharmProjects/feature_analysis/datafiles/WF_dataset/wf.csv'
     # chunks = []
-    # chunksize = 2000
-    # neg_interval = {}
-    # pos_interval = {}
-    # for chunk in pd.read_csv(path, chunksize=chunksize):
-    #     chunks.append(chunk)
-    #     print(len(chunks))
-    # for df in chunks:
-    #     data = df.values.tolist()
-    #     padded_traces = []
-    #     for trace in data:
-    #         padded_t = padding(trace, in_inter_list, out_inter_list)
-    #         padded_traces.append(padded_t)
+    chunksize = 2000
+    neg_interval = {}
+    pos_interval = {}
+    for chunk in pd.read_csv(path, chunksize=chunksize):
+        # chunks.append(chunk)
+        # print(len(chunks))
+        data = chunk.values.tolist()
+        for trace in data:
+            padded_t = adv_padding(trace, in_inter_list, out_inter_list)
+            with open('wf_padded_4.csv', 'a') as f:
+                writer = csv.writer(f)
+                writer.writerow(padded_t[0:5001])
 
-    path = 'pad_test.csv'
-    df = pd.read_csv(path, header=None)
-    trace = df.values.tolist()
-    padded_t = padding(trace, in_inter_list, out_inter_list)
+
+
+    # path = 'pad_test.csv'
+    # df = pd.read_csv(path, header=None)
+    # padded_traces = []
+    # trace = df.values.tolist()[0]
+    # padded_t = padding(trace, in_inter_list, out_inter_list)
+    # padded_traces.append(padded_t)
+    # with open('pad_trace.csv', 'w') as f:
+    #     writer = csv.writer(f)
+    #     writer.writerow(padded_t)

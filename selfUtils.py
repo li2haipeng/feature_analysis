@@ -139,7 +139,7 @@ def just_class(file_path, output_path):
 
 
 def load_data(path,sel_col):
-    raw_data = pd.read_csv(path, header=None)
+    raw_data = pd.read_csv(path,header=None)
     y_raw = raw_data.iloc[:,0]
     le = preprocessing.LabelEncoder()
     labels = le.fit_transform(y_raw)

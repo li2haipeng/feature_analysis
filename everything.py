@@ -1,15 +1,16 @@
-
+from __future__ import division
+import csv
 import pandas as pd
+import random
+
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('/home/lhp/PycharmProjects/dataset/Video_dataset/video_round1.csv',sep='delimiter', header=None)
-    label = data.iloc[0,:]
-    new = []
-    for l in label.values:
-        n = l[0:8]
-        new.append(n)
-    for idx, i in enumerate(new):
-        data.iloc[0,idx] = i
 
-
+    path = '/home/lhp/PycharmProjects/feature_analysis/wf_decoy.csv'
+    chunksize = 1000
+    count = 0
+    for chunk in pd.read_csv(path, chunksize=chunksize, names=list(range(5000))):
+        # count += 1
+        # chunk.to_csv(str(count)+'.csv',header=False,index=None)
+        print(chunk.shape)
