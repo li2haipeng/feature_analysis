@@ -113,17 +113,18 @@ def alexa_burst():
 
 
 def numeric():
-    data = pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/alexa_100.csv',header = None)
+    data = pd.read_csv('datafiles/video/video_packet.csv', header=None)
     y = data.iloc[:, 0]
     le = preprocessing.LabelEncoder()
     labels = le.fit_transform(y)
     data.iloc[:, 0] = labels
-    data.to_csv('/home/lhp/PycharmProjects/feature_analysis/alexa_100_numeric.csv', index=False)
+    data.to_csv('datafiles/video/video_packet_numeric.csv', index=False)
 
 
 def video_burst():
     # path = '/home/lhp/PycharmProjects/dataset/Video_dataset/csv/Gaming/Gaming_01/'
     path = sys.argv[1]
+    window = float(sys.argv[2])
     files = os.listdir(path)
     for f in files:
         fpath = os.path.join(path, f)
@@ -138,7 +139,7 @@ def video_burst():
         for p in packets:
             if p[2] == -1:
                 downloading_packets.append(p)
-        window = 0.25
+
         init_time = 0
         bursts = [trace_name]
 
@@ -154,10 +155,13 @@ def video_burst():
                     bursts.append(0)
                     init_time += window
                 burst = d_p[1]
-        with open('video_bin.csv', 'a') as w:
+        pad = lambda a, i: a[0:i] if a.shape[0] >= i else np.hstack((a, np.zeros(i - a.shape[0])))
+        n = int(180/window) +1
+        bursts = pad(np.array(bursts), n)
+        with open('datafiles/video/video_bin_' + str(window) + '.csv', 'a') as w:
             writer = csv.writer(w)
             writer.writerow(bursts)
-    print()
+        print(bursts.shape)
 
 
 def to_one_file(path):
@@ -220,6 +224,67 @@ def incoming_selection():
             writer.writerow(new_trace)
 
 
+def ave_everything():
+    # path = 'datafiles/WF_dataset/aggregation/X_wf.csv'
+    # chunksize = 2000
+    # L = S = S_n = S_p = L_n = L_p = 0
+    # for chunk in pd.read_csv(path, chunksize=chunksize, header=None):
+    #     l = chunk.astype(bool).sum(axis=0)
+    #     S_n += sum(n < 0 for n in chunk.values.flatten())
+    #     S_p += sum(n > 0 for n in chunk.values.flatten())
+    #     L += sum(l)
+    # print(L, S_p, S_n)
+
+    # print('alexa')
+    # L = S = S_n = S_p = L_n = L_p = 0
+    # path = 'datafiles/alexa/generic_class.csv'
+    # data = pd.read_csv(path)
+    # L = data.astype(bool).sum(axis=0)
+    # print(L)
+    # lists = data.iloc[:,1:].values.tolist()
+    #
+    # for trace in lists:
+    #     s = sum([abs(ele) for ele in trace])
+    #     S += s
+    #     neg = [i for i in trace if i < 0]
+    #     pos = [i for i in trace if i > 0]
+    #     s_n = sum(neg)
+    #     s_p = sum(pos)
+    #     S_n += s_n
+    #     S_p += s_p
+    #     L_n += len(neg)
+    #     L_p += len(pos)
+    # print(S, S_p, S_n, L_p, L_n)
+    #
+    print('video')
+    L = S = S_n = S_p = L_n = L_p = 0
+    path = '/home/lhp/PycharmProjects/dataset/Video_dataset/video_packet.csv'
+    chunksize = 2000
+    for chunk in pd.read_csv(path, chunksize=chunksize, header=None):
+        l = chunk.astype(bool).sum(axis=0)
+        L += sum(l)
+    # print(L)
+        lists = chunk.iloc[:, 1:].values.tolist()
+        for trace in lists:
+            s = sum([abs(ele) for ele in trace])
+            S += s
+            neg = [i for i in trace if i < 0]
+            pos = [i for i in trace if i > 0]
+            s_n = sum(neg)
+            s_p = sum(pos)
+            S_n += s_n
+            S_p += s_p
+            L_n += len(neg)
+            L_p += len(pos)
+    print(S, S_p, S_n, L_p, L_n)
+
+
+def r():
+   data = pd.read_csv('datafiles/video/video_packet.csv')
+   x = data.iloc[:,1:].div(1024).round(0)
+   result = pd.concat([data.iloc[:,0],x],axis=1)
+   result.to_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/video/video_packet_kb.csv')
+
 
 if __name__ == "__main__":
     # wf_burst()
@@ -231,4 +296,6 @@ if __name__ == "__main__":
     # path = sys.argv[1]
     # # path = '/home/lhp/PycharmProjects/dataset/Alexa_dataset/sel_defense/dp/1'
     # to_one_file(path)
-    incoming_selection()
+    # incoming_selection()
+    # ave_everything()
+    r()

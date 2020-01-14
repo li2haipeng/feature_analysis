@@ -74,12 +74,12 @@ def wf_preprc():
 
 
 def mi_wf():
-    wf_preprc()
+    # wf_preprc()
     x = []
     chunk_l = []
-
+    y = pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/WF_dataset/aggregation/y_wf.csv', header=None)
     chunksize = 2000
-    for chunk in pd.read_csv('feature_analysis/datafiles/X_wf.csv', chunksize=chunksize, header=None):
+    for chunk in pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/WF_dataset/aggregation/X_wf.csv', chunksize=chunksize, header=None):
         chunk_l.append(chunk)
         print(len(chunk_l))
 
@@ -96,7 +96,7 @@ def mi_wf():
 
 
 def mi_video():
-    data = pd.read_csv('/home/lhp/PycharmProjects/dataset/Video_dataset/video_bin_numeric_padded.csv', header=None)
+    data = pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/video_bin_dp_5e-6_30.csv', header=None)
     x = data.iloc[:, 1:]
     le = preprocessing.LabelEncoder()
     labels = le.fit_transform(data.iloc[:, 0])
@@ -104,7 +104,7 @@ def mi_video():
     for c in _iterate_columns(x.values):
         c = c.reshape(-1, 1)
         score = mutual_info_classif(c, labels)
-        with open('/home/lhp/PycharmProjects/feature_analysis/datafiles/mi_video_bin_py.csv', 'a') as f:
+        with open('/home/lhp/PycharmProjects/feature_analysis/datafiles/mi_video_bin_dp_5e-6_30.csv', 'a') as f:
             writer = csv.writer(f)
             writer.writerow(score)
 

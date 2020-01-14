@@ -147,36 +147,50 @@ def dp_bin(ori_packets, eps, selected_idxes):
 
 
 def main():
-    csv_path = '/home/lhp/PycharmProjects/feature_analysis/datafiles/video/video_bin_numeric_padded.csv'
+
+    method = sys.argv[1]
+    b = float(sys.argv[2])
+    r = float(sys.argv[3])/10
+    eps = float(sys.argv[4])
+
+    # f = str(eps)
+    # name = len(f)-2
+
+    # eps = 0.00005
+    l = int(180/b)
+    k = int(l*r*0.1)
+    csv_path = 'datafiles/video/KB/video_bin_'+ str(b) +'_kb.csv'
     packets = pd.read_csv(csv_path)
     packets = packets.values.tolist()
-    eps = 0.0000005
 
-    score_path = '/home/lhp/PycharmProjects/feature_analysis/datafiles/mi_video_bin_py.csv'
+    score_path = 'results/KB/' + method + '/' + method + '_video_bin_'+ str(b) + '_kb.csv'
     score_list = pd.read_csv(score_path)
-    score_list = score_list.sort_values(by=['col1'], ascending=False)
-    selected_indexes = score_list.iloc[:30,0]
+    score_list = score_list.sort_values(score_list.columns[1], ascending=False)
+    selected_indexes = score_list.iloc[:k,0]
     selected_indexes = selected_indexes.values.tolist()
     selected_indexes.sort()
-    s= 0
+    s = 0
+    overhead = 0
+    ori_size = 0
     for trace in packets:
         incoming = trace[1:]
         s+=1
         idx = s%200
         incoming_lap_list, incoming_proc_q, in_overhead = dp_bin(incoming, eps, selected_indexes)
-        incoming_lap_list[0] = trace[0]
-        lap_list = incoming_lap_list
-        with open('video_bin_dp_5e-6_30.csv', 'a') as w:
+        # incoming_lap_list[0] = trace[0]
+        lap_list = incoming_lap_list[1:]
+        with open('results/seleted_lap/'+ method + '_video_bin_dp_'+ str(eps) +'.csv', 'a') as w:
             writer = csv.writer(w)
             writer.writerow(lap_list)
-
-        buffer_list = list(incoming_proc_q.queue)
-        buffer_list.sort(key=su.sort_by_name)
-        buffer_list.append([in_overhead])
-
-        bf_dest = '/home/lhp/PycharmProjects/dataset/Video_dataset/sel_defense/buffer/' + str(int(trace[0])) + '/'
-        if not os.path.isdir(bf_dest):
-            os.makedirs(bf_dest)
+        overhead += in_overhead
+        ori_size += sum(incoming)
+        # buffer_list = list(incoming_proc_q.queue)
+        # buffer_list.sort(key=su.sort_by_name)
+        # buffer_list.append([in_overhead])
+        #
+        # bf_dest = '/home/lhp/PycharmProjects/dataset/Video_dataset/sel_defense/buffer/' + str(int(trace[0])) + '/'
+        # if not os.path.isdir(bf_dest):
+        #     os.makedirs(bf_dest)
         # try:
         #     buffer_df = pd.DataFrame(buffer_list, columns = ['buffered_time', 'buffered_index', 'size', 'cleaned_time', 'cleaned_index', 'real_n'])
         #     buffer_df.to_csv(bf_dest + str(int(trace[0])) + '_' + str(int(idx)) + '_buffer.csv', index=False)
@@ -184,7 +198,10 @@ def main():
         #     print('no proc queue!!!')
 
         if s%200 == 0:
-            print(str(int(s)) + ' is finished')
+            print(str(int(s)) + ' ' + str(b) + ' ' +str(r) + ' ' +method + ' ' + str(eps) + ' is finished')
+    with open('overhead_' + '_' + method +  str(eps) + '_' + str(b) +'.csv', 'a') as w:
+        writer = csv.writer(w)
+        writer.writerow([method, b, r, ori_size, overhead])
 
 
 if __name__ == "__main__":

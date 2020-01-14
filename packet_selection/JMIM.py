@@ -10,7 +10,7 @@ def _jmim(selected_feature, feature_set, num_to_select, labels, score_list):
     ###
     # I(x,y;c) = H(x|c) - [ H(x,c,y) - H(c,y) ] + I(y;c) #
     ####
-
+    start = datetime.datetime.now()
     col = list(feature_set)
     pool = []
     for i in col:
@@ -25,7 +25,7 @@ def _jmim(selected_feature, feature_set, num_to_select, labels, score_list):
             sf = sf_packge[1]
             sf_idx = sf_packge[0]
 
-            I_yc = score_list.iloc[sf_idx, 0]
+            I_yc = score_list.iloc[sf_idx, 1]
 
             sf = np.reshape(sf, (1,-1))
             labels = np.reshape(labels, (1, -1))
@@ -49,7 +49,7 @@ def _jmim(selected_feature, feature_set, num_to_select, labels, score_list):
                 min_jmi = I_xy_c
                 min_feature = candidate_f
                 index = int(i)
-        print(I_xy_c)
+        # print(I_xy_c)
         if I_xy_c < 0:
             print()
         pool.append([index, min_feature, min_jmi])
@@ -65,10 +65,9 @@ def _jmim(selected_feature, feature_set, num_to_select, labels, score_list):
             max_candidate_score = float(candidate[2])
 
     selected_feature.append([max_candidate_idx, max_candidate, max_candidate_score])
-    feature_set.drop(columns=[str(max_candidate_idx)], inplace=True)
+    feature_set.drop(columns = [str(max_candidate_idx)], inplace=True)
 
-
-    print(str(len(selected_feature)) + ' ' + str(max_candidate_idx) + ' ' + str(max_candidate_score) + ' at ' + str(datetime.datetime.now()))
+    print(str(len(selected_feature)) + ' ' + str(max_candidate_idx) + ' ' + str(max_candidate_score) + ' at ' + str(datetime.datetime.now()-start))
 
     return selected_feature, feature_set
 
@@ -76,22 +75,22 @@ def _jmim(selected_feature, feature_set, num_to_select, labels, score_list):
 if __name__ == '__main__':
 
     # num_to_select = int(sys.argv[1])
-    num_to_select = 150
-    data = pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/alexa/generic_class.csv')
+    num_to_select = 10
+    data = pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/video/KB/video_bin_2.0_kb.csv')
     x = data.iloc[:, 1:]
     le = preprocessing.LabelEncoder()
     labels = le.fit_transform(data.iloc[:, 0])
 
     max_mi = 0
     max_index = 0
-    score_list = pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/alexa/scores/alexa_mi.csv')
+    score_list = pd.read_csv('/home/lhp/PycharmProjects/feature_analysis/datafiles/video/mi/mi_video_bin_2.0.csv',header=None)
 
     for idx, s in score_list.iterrows():
-        if s['0'] > max_mi:
-            max_mi = s['0']
+        if s[1] > max_mi:
+            max_mi = s[1]
             max_index = idx
-    max_feature = list(x[str(max_index)])
-    x.drop(columns=[str(max_index)],inplace=True)
+    max_feature = list(x.iloc[:,max_index])
+    x.drop(columns = [str(max_index+1)],inplace=True)
     selected_feature = [[max_index, max_feature, max_mi]]
     print('Start to select '+ str(num_to_select) + ' features at ' + str(datetime.datetime.now()))
     print('number ' + 'index ' + 'score ' + ' time')
@@ -103,7 +102,6 @@ if __name__ == '__main__':
     print('Done at ' + str(datetime.datetime.now()))
     df = pd.DataFrame(selected_feature)
     df = df.iloc[:, [0, 2]]
-    df.to_csv('jmim.csv', index=False)
-
+    df.to_csv('jmim_video_bin_2.0.csv', index=False)
 
     print()

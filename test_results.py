@@ -94,15 +94,15 @@ def test(params, X_test, y_test, NUM_CLASS):
 def main():
     # method = sys.argv[1]
     method = 'mrmr'
-    model_path = '/home/lhp/PycharmProjects/dl_models/cnn_wf_padded.h5'
+    model_path = '/home/lhp/PycharmProjects/dl_models/cnn_video_bin.h5'
     model = load_model(model_path)
     # path = '/home/lhp/PycharmProjects/dataset/Alexa_dataset/numeric_class.csv'
     # selected_f = pd.read_csv(path,header=None)
 
     # selected_col = selected_f.iloc[:,0]
     # selected_col = sorted(selected_col)
-    selected_col = [i for i in range(1, 3501)]
-    X_train, y_train, X_test, y_test, num_classes = su.load_data('wf_padded_rr.csv', selected_col)
+    selected_col = [i for i in range(1, 721)]
+    X_train, y_train, X_test, y_test, num_classes = su.load_data('video_bin_dp_5e-5_720.csv', selected_col)
 
     # PARAMS = default_params()
     # test(PARAMS, X_test, y_test, num_classes)
