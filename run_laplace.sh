@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-for method in 'mrmr' 'jmim'
+for method in 'mi' 'jmim'
 do
-  for b in '0.05' '0.25' '0.5' '1.0'
+  for b in '0.25' '2.0'
   do
     for r in {2..10..2}
     do
@@ -12,15 +12,4 @@ do
       done
     done
   done
-done
-
-for b in '0.05' '0.25' '0.5' '1.0'
-  do
-    for r in {20..100..20}
-    do
-      for eps in 0.000005 0.00005 0.0005 0.005 0.05
-      do
-        python3 laplace.py mi "$b" "$r" "$eps"
-      done
-    done
 done

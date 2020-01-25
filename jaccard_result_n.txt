@@ -1,0 +1,21 @@
+0.05 mrmr with mi 0.9554794520547946
+0.25 mrmr with mi 0.8156028368794326
+0.5 mrmr with mi 0.6507936507936508
+1.0 mrmr with mi 0
+2.0 mrmr with mi 0
+0.05 jmim with mi 0.45062132112491826
+0.25 jmim with mi 0.5423728813559322
+0.5 jmim with mi 0.4925373134328358
+1.0 jmim with mi 0
+2.0 jmim with mi 0
+
+0.05 mrmr with jmim 0.45382585751978893
+0.25 mrmr with jmim 0.5027932960893855
+0.5 mrmr with jmim 0.4084507042253521
+1.0 mrmr with jmim 0
+2.0 mrmr with jmim 0
+0.05 jmim with jmim 1.0
+0.25 jmim with jmim 1.0
+0.5 jmim with jmim 1.0
+1.0 jmim with jmim 0
+2.0 jmim with jmim 0
