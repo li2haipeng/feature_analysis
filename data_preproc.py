@@ -118,7 +118,7 @@ def numeric():
     le = preprocessing.LabelEncoder()
     labels = le.fit_transform(y)
     data.iloc[:, 0] = labels
-    data.to_csv('datafiles/video/video_packet_numeric.csv', index=False)
+    data.to_csv('datafiles/video/video_packet_numeric.csv')
 
 
 def video_burst():

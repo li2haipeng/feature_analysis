@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
 
-for method in 'mi' 'jmim'
+for method in 'mi'
 do
-  for b in '0.25' '2.0'
+  for b in '0.05'
   do
-    for r in {2..10..2}
+    for r in 60
     do
-      for eps in 0.000005 0.00005 0.0005 0.005
+      for eps in 0.0005
       do
-        python3 laplace.py "$method" "$b" "$r" "$eps"
+        python3 laplace_weight.py "$method" "$b" "$r" "$eps"
       done
     done
   done
 done
+
+
+#for b in '0.25'
+#do
+#  for r in 144
+#  do
+#    for eps in 0.05
+#    do
+#      python3 laplace_pfi.py "$b" "$r" "$eps"
+#    done
+#  done
+#done
+

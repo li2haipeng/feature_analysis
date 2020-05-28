@@ -150,31 +150,25 @@ def dp_bin(ori_packets, eps_light, eps_heavy, selected_idxes):
 
 def main():
 
-    method = sys.argv[1]
-    b = float(sys.argv[2])
-    r = float(sys.argv[3])
-    eps_heavy = float(sys.argv[4])
-    # eps_light = float(sys.argv[5])
+    b = float(sys.argv[1])
+    r = int(sys.argv[2])
+    eps_heavy = float(sys.argv[3])
+    eps_light = 0.05
 
     # method = 'mi'
     # b = 0.25
     # r = 3
     # eps_heavy = 0.0005
-    eps_light = 0.05
+    # eps_light = 0.005
     # name = len(f)-2
 
     l = int(180/b)
-    k = int(l*r*0.01)
-    csv_path = 'datafiles/video/KB/video_bin_0.05_kb.csv'
+    csv_path = 'datafiles/video/KB//video_bin_'+ str(b) +'_kb.csv'
     packets = pd.read_csv(csv_path)
     packets = packets.values.tolist()
 
-    score_path = "results/KB/mi/mi_video_bin_0.05_kb.csv"
-    score_list = pd.read_csv(score_path)
-    score_list = score_list.sort_values(score_list.columns[1], ascending=False)
-    selected_indexes = score_list.iloc[:k,0]
-    selected_indexes = selected_indexes.values.tolist()
-    selected_indexes.sort()
+    selected_indexes = [i for i in range(120,120+r)]
+    # selected_indexes.sort()
     s = 0
     overhead = 0
     ori_size = 0
@@ -185,7 +179,7 @@ def main():
         incoming_lap_list, incoming_proc_q, in_overhead = dp_bin(incoming, eps_light, eps_heavy, selected_indexes)
         incoming_lap_list[0] = trace[1]
         lap_list = incoming_lap_list
-        with open('/home/lhp/Documents/mi_'  + str(b) + '_video_bin_dp_' + str(r) + '_' + str(eps_heavy) +'_' + str(eps_light) +'_kb.csv', 'a') as w:
+        with open('/home/lhp/Documents/pfi_'  + str(b) + '_video_bin_dp_' + str(r) + '_' + str(eps_heavy) +'_' + str(eps_light) +'_kb.csv', 'a') as w:
             writer = csv.writer(w)
             writer.writerow(lap_list)
         overhead += in_overhead
@@ -204,12 +198,12 @@ def main():
         #     print('no proc queue!!!')
 
         if s%200 == 0:
-            print(str(int(s)) + ' ' + str(b) + ' ' +str(r) + ' ' +method + ' ' + str(eps_heavy) + ' is finished')
+            print(str(int(s)) + ' ' + str(b) + ' ' +str(selected_indexes[-1]) + ' ' + str(eps_heavy) + ' is finished')
     # with open('overhead_selected/' + str(b) +'overhead_' + str(r) + '_' +  method + '_' + str(eps) + '.csv', 'a') as w:
 
-    with open('overhead_selected/weighted_overhead.csv', 'a') as w:
+    with open('pfi_weighted_overhead.csv', 'a') as w:
         writer = csv.writer(w)
-        writer.writerow([method, b, r, eps_heavy, eps_light, ori_size, overhead])
+        writer.writerow([b, r, eps_heavy, eps_light, ori_size, overhead])
 
 
 if __name__ == "__main__":
